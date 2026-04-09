@@ -1,7 +1,7 @@
 """File content extraction for chat context injection."""
-from pathlib import Path
 import csv
 import io
+from pathlib import Path
 
 import structlog
 
@@ -148,9 +148,9 @@ def _extract_pptx(fpath: Path) -> str | None:
 
 def _extract_odt(fpath: Path) -> str | None:
     try:
+        from odf import teletype
         from odf.opendocument import load
         from odf.text import P
-        from odf import teletype
 
         doc = load(str(fpath))
         paragraphs = doc.getElementsByType(P)
@@ -162,9 +162,9 @@ def _extract_odt(fpath: Path) -> str | None:
 
 def _extract_ods(fpath: Path) -> str | None:
     try:
-        from odf.opendocument import load
-        from odf.table import Table, TableRow, TableCell
         from odf import teletype
+        from odf.opendocument import load
+        from odf.table import Table, TableCell, TableRow
 
         doc = load(str(fpath))
         parts: list[str] = []
@@ -197,8 +197,8 @@ def _extract_rtf(fpath: Path) -> str | None:
 def _extract_epub(fpath: Path) -> str | None:
     try:
         import ebooklib
-        from ebooklib import epub
         from bs4 import BeautifulSoup
+        from ebooklib import epub
 
         book = epub.read_epub(str(fpath), options={"ignore_ncx": True})
         parts: list[str] = []

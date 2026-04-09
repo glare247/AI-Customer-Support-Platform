@@ -3,7 +3,6 @@
 
 import asyncio
 import os
-import sys
 
 import httpx
 from qdrant_client import AsyncQdrantClient
