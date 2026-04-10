@@ -18,6 +18,8 @@ spec:
       labels:
         app: ai-platform
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
         - name: ai-platform
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

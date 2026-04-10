@@ -1,12 +1,9 @@
 name: CD Pipeline
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: "Image tag to deploy"
-        required: true
-        default: "local"
 
 jobs:
   deploy:
@@ -19,14 +16,20 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute image tag
+        id: tag
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "TAG=sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
       - name: Update image tag in values.yaml
         run: |
-          sed -i "s/  tag: .*/  tag: ${{ github.event.inputs.image_tag }}/" helm/ai-platform/values.yaml
+          sed -i "s/  tag: .*/  tag: ${{ steps.tag.outputs.TAG }}/" helm/ai-platform/values.yaml
 
       - name: Commit and push
         run: |
           git config user.email "ci-bot@github.com"
           git config user.name "CI Bot"
           git add helm/ai-platform/values.yaml
-          git diff --cached --quiet || git commit -m "ci: deploy image ${{ github.event.inputs.image_tag }} [skip ci]"
+          git diff --cached --quiet || git commit -m "ci: deploy image ${{ steps.tag.outputs.TAG }} [skip ci]"
           git push
