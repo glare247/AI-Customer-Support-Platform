@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/glare247/ai-customer-support-platform/ai-platform
-  tag: latest
+  tag: sha-b5f2976
   pullPolicy: Always
 
 replicaCount: 1
