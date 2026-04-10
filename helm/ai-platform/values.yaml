@@ -1,6 +1,6 @@
 image:
   repository: ai-platform
-  tag: sha-5b05058
+  tag: local
   pullPolicy: Never
 
 replicaCount: 1
