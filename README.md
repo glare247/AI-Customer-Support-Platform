@@ -69,6 +69,12 @@ The platform enables a SaaS company to:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+<img width="1280" height="714" alt="architecture sample" src="https://github.com/user-attachments/assets/f334beb4-b795-4de4-b9d0-c27391ae6d3d" />
+
+
+
+
+
 ---
 
 ## Tech Stack
