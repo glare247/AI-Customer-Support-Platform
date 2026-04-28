@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: alembic-migration
+  namespace: ai-platform
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform:latest
+          command: ["sh", "-c"]
+          args:
+            - |
+              alembic -c /app/ai_platform/db/alembic.ini upgrade head
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ai-platform-secrets
+                  key: DATABASE_URL
+            - name: PYTHONPATH
+              value: /app
