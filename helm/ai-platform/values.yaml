@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/glare247/ai-customer-support-platform/ai-platform
-  tag: sha-8868ac9
+  repository: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform
+  tag: sha-sha-c75fea5
   pullPolicy: Always
 
 replicaCount: 1
