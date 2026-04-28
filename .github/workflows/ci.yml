@@ -86,12 +86,12 @@ jobs:
           file: docker/Dockerfile
           push: true
           tags: |
-            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:sha-${{ steps.tag.outputs.TAG }}
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ steps.tag.outputs.TAG }}
             ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Scan image with ECR
+      - name: Confirm image pushed to ECR
         run: |
           echo "Image pushed to ECR — scan triggered automatically on push"
           echo "Check results at: https://console.aws.amazon.com/ecr/repositories"
