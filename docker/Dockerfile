@@ -19,6 +19,7 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 
 COPY src/ai_platform ./ai_platform
+COPY src/scripts ./scripts
 
 RUN mkdir -p /tmp/ai-platform-uploads \
  && chown appuser:appgroup /tmp/ai-platform-uploads
