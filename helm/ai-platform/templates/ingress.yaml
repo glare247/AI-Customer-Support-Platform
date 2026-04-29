@@ -4,12 +4,14 @@ metadata:
   name: ai-platform
   namespace: ai-platform
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
-    - host: {{ .Values.ingress.host }}
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
@@ -17,4 +19,4 @@ spec:
               service:
                 name: ai-platform
                 port:
-                  number: {{ .Values.service.port }}
+                  number: 80
