@@ -25,7 +25,7 @@ jobs:
       - name: Update image tag and repository in values.yaml
         run: |
           sed -i "s|  repository: .*|  repository: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}|" helm/ai-platform/values.yaml
-          sed -i "s|  tag: .*|  tag: sha-${{ steps.tag.outputs.TAG }}|" helm/ai-platform/values.yaml
+          sed -i "s|  tag: .*|  tag: ${{ steps.tag.outputs.TAG }}|" helm/ai-platform/values.yaml
           sed -i "s|  pullPolicy: .*|  pullPolicy: Always|" helm/ai-platform/values.yaml
 
       - name: Commit and push
@@ -33,5 +33,5 @@ jobs:
           git config user.email "ci-bot@github.com"
           git config user.name "CI Bot"
           git add helm/ai-platform/values.yaml
-          git diff --cached --quiet || git commit -m "ci: deploy image sha-${{ steps.tag.outputs.TAG }} to EKS [skip ci]"
+          git diff --cached --quiet || git commit -m "ci: deploy image ${{ steps.tag.outputs.TAG }} to EKS [skip ci]"
           git push
