@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qdrant-seed
+  namespace: ai-platform
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform:latest
+          command: ["python3", "src/scripts/seed_qdrant.py"]
+          env:
+            - name: QDRANT_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: ai-platform-secrets
+                  key: QDRANT_HOST
+            - name: QDRANT_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: ai-platform-secrets
+                  key: QDRANT_PORT
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-platform-secrets
+                  key: LLM_API_KEY
