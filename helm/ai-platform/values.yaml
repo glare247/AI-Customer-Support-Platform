@@ -1,6 +1,6 @@
 image:
   repository: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform
-  tag: sha-c125525
+  tag: sha-f826e44
   pullPolicy: Always
 
 replicaCount: 1
