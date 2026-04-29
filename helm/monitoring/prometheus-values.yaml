@@ -1,0 +1,63 @@
+# kube-prometheus-stack values for AI Platform
+# Deploy: helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+#   -n monitoring --create-namespace -f helm/monitoring/prometheus-values.yaml
+
+grafana:
+  adminPassword: "admin123"
+  defaultDashboardsEnabled: true
+
+  # Auto-load the AI platform dashboard from ConfigMap
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: monitoring
+
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/"
+
+prometheus:
+  prometheusSpec:
+    # Scrape pods with prometheus.io/scrape: "true" annotation
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    additionalScrapeConfigs:
+      - job_name: "ai-platform-pods"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["ai-platform"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+    retention: 15d
+    retentionSize: "8GiB"
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+alertmanager:
+  enabled: false

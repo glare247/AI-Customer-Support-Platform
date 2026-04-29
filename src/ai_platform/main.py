@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from ai_platform.api import chat, conversations, files, health, rag
 from ai_platform.config import settings
@@ -49,6 +50,12 @@ app.include_router(chat.router)
 app.include_router(conversations.router)
 app.include_router(files.router)
 app.include_router(rag.router)
+
+# Prometheus metrics — exposed at /metrics, scraped by kube-prometheus-stack
+Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=["/healthz", "/readyz", "/metrics"],
+).instrument(app).expose(app, include_in_schema=False)
 
 # Static files and chat UI
 STATIC_DIR = Path(__file__).parent / "static"

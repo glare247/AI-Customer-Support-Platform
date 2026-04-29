@@ -10,7 +10,7 @@ spec:
       containers:
         - name: seed
           image: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform:latest
-          command: ["python3", "src/scripts/seed_qdrant.py"]
+          command: ["python3", "/app/scripts/seed_qdrant.py"]
           env:
             - name: QDRANT_HOST
               valueFrom:
@@ -22,8 +22,8 @@ spec:
                 secretKeyRef:
                   name: ai-platform-secrets
                   key: QDRANT_PORT
-            - name: LLM_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ai-platform-secrets
-                  key: LLM_API_KEY
+            # LLM_API_KEY intentionally omitted — Groq does not support embeddings.
+            # The seed script falls back to deterministic random vectors for local dev/demo.
+            # For production, swap LLM_BASE_URL to an embedding provider (e.g. OpenAI).
+            - name: QDRANT_COLLECTION
+              value: "faq_documents"

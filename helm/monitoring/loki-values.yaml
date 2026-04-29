@@ -1,0 +1,84 @@
+# loki-stack values for AI Platform
+# Deploy: helm upgrade --install loki grafana/loki-stack \
+#   -n monitoring -f helm/monitoring/loki-values.yaml
+
+loki:
+  enabled: true
+  isDefault: false
+
+  config:
+    schema_config:
+      configs:
+        - from: "2024-01-01"
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /data/loki/boltdb-shipper-active
+        cache_location: /data/loki/boltdb-shipper-cache
+        shared_store: filesystem
+      filesystem:
+        directory: /data/loki/chunks
+
+    limits_config:
+      retention_period: 168h   # 7 days
+      ingestion_rate_mb: 8
+      ingestion_burst_size_mb: 16
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+# Promtail — collects logs from all pods and ships to Loki
+promtail:
+  enabled: true
+
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        pipeline_stages:
+          # Parse JSON logs emitted by structlog
+          - json:
+              expressions:
+                level: level
+                event: event
+                request_id: request_id
+                duration_ms: duration_ms
+          - labels:
+              level:
+              request_id:
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# Grafana is managed by kube-prometheus-stack — disable here
+grafana:
+  enabled: false
