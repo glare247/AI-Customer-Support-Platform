@@ -3,6 +3,8 @@ name: CD Pipeline
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'helm/ai-platform/values.yaml'
   workflow_dispatch:
 
 jobs:
