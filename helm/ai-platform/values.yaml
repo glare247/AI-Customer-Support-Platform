@@ -3,7 +3,7 @@ version: v1
 
 image:
   repository: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform
-  tag: sha-2d88816
+  tag: sha-5f1c675
   pullPolicy: Always
 
 replicaCount: 1
