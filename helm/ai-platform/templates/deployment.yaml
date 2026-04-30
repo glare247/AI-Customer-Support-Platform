@@ -1,13 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai-platform
+  name: {{ .Values.appName | default "ai-platform" }}
   namespace: ai-platform
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: ai-platform
+      version: {{ .Values.version | default "v1" }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,6 +18,7 @@ spec:
     metadata:
       labels:
         app: ai-platform
+        version: {{ .Values.version | default "v1" }}
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"

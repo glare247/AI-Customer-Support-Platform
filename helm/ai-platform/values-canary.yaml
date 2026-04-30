@@ -1,21 +1,23 @@
-appName: ai-platform
-version: v1
+appName: ai-platform-canary
+version: v2
 
 image:
   repository: 502759712845.dkr.ecr.us-east-1.amazonaws.com/ai-platform
   tag: sha-da4f940
   pullPolicy: Always
 
+# 1 canary replica alongside 1 stable = 50% traffic split
+# To reduce to 10%: set stable replicaCount: 9, canary replicaCount: 1
 replicaCount: 1
 
 service:
-  enabled: true
+  enabled: false  # canary shares the existing Service owned by ArgoCD
   type: ClusterIP
   port: 80
   targetPort: 8000
 
 ingress:
-  enabled: true
+  enabled: false
   host: localhost
 
 resources:
@@ -33,8 +35,9 @@ env:
     value: "debug"
   - name: LLM_BASE_URL
     value: "https://api.groq.com/openai/v1"
+  # Canary uses faster/cheaper model — simulating a model version upgrade
   - name: LLM_MODEL
-    value: "llama-3.3-70b-versatile"
+    value: "llama-3.1-8b-instant"
   - name: QDRANT_COLLECTION
     value: "faq_documents"
   - name: CACHE_TTL_SECONDS
@@ -42,4 +45,4 @@ env:
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://tempo.monitoring.svc.cluster.local:4317"
   - name: OTEL_SERVICE_NAME
-    value: "ai-platform"
+    value: "ai-platform-canary"
