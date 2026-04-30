@@ -1,0 +1,88 @@
+---
+# Allow ai-platform app to reach postgres, redis, qdrant
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-app-to-backends
+  namespace: ai-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: ai-platform
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - port: 5432   # postgres
+        - port: 6379   # redis
+        - port: 6333   # qdrant
+        - port: 53     # DNS
+          protocol: UDP
+        - port: 443    # HTTPS (Groq API)
+        - port: 4317   # OTLP (Tempo)
+---
+# Postgres — only accept from ai-platform and migration jobs
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-ingress
+  namespace: ai-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ai-platform
+        - podSelector:
+            matchLabels:
+              app: alembic-migration
+      ports:
+        - port: 5432
+---
+# Redis — only accept from ai-platform
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-ingress
+  namespace: ai-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ai-platform
+      ports:
+        - port: 6379
+---
+# Qdrant — only accept from ai-platform and seed jobs
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qdrant-ingress
+  namespace: ai-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: qdrant
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ai-platform
+        - podSelector:
+            matchLabels:
+              app: qdrant-seed
+      ports:
+        - port: 6333

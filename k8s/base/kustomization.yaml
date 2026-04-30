@@ -9,3 +9,4 @@ resources:
   - qdrant.yaml
   - migration-job.yaml
   - seed-job.yaml
+  - network-policies.yaml
