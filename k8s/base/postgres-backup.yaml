@@ -1,0 +1,51 @@
+---
+# CronJob: daily pg_dump to S3 at 2am UTC
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: ai-platform
+spec:
+  schedule: "0 2 * * *"   # daily at 02:00 UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              env:
+                - name: PGPASSWORD
+                  value: aiplatform
+                - name: S3_BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: ai-platform-secrets
+                      key: BACKUP_S3_BUCKET
+                      optional: true
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  FILENAME="backup_${TIMESTAMP}.sql.gz"
+
+                  echo "Starting backup: $FILENAME"
+                  pg_dump -h postgres -U aiplatform -d aiplatform | gzip > /tmp/$FILENAME
+
+                  if [ -n "$S3_BUCKET" ]; then
+                    # Ship to S3 using instance role (IRSA not needed — node IAM has S3 access)
+                    apk add --no-cache aws-cli --quiet 2>/dev/null || true
+                    aws s3 cp /tmp/$FILENAME s3://${S3_BUCKET}/postgres/${FILENAME} && \
+                      echo "Backup uploaded to s3://${S3_BUCKET}/postgres/${FILENAME}" || \
+                      echo "S3 upload failed — backup kept locally"
+                  else
+                    echo "No S3_BUCKET configured — backup stored at /tmp/$FILENAME (ephemeral)"
+                  fi
+
+                  # Verify backup is valid
+                  gunzip -t /tmp/$FILENAME && echo "Backup integrity check passed"

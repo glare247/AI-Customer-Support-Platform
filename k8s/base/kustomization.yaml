@@ -10,3 +10,4 @@ resources:
   - migration-job.yaml
   - seed-job.yaml
   - network-policies.yaml
+  - postgres-backup.yaml

@@ -1,0 +1,41 @@
+---
+# One-shot Job: restore postgres from a specific S3 backup
+# Usage: kubectl create job postgres-restore --from=cronjob/postgres-backup -n ai-platform
+# Or apply this manifest after setting BACKUP_FILE env var
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore
+  namespace: ai-platform
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: restore
+          image: postgres:16-alpine
+          env:
+            - name: PGPASSWORD
+              value: aiplatform
+            - name: BACKUP_FILE
+              value: ""   # set to s3://bucket/postgres/backup_YYYYMMDD_HHMMSS.sql.gz
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ -z "$BACKUP_FILE" ]; then
+                echo "ERROR: Set BACKUP_FILE to the S3 path of the backup to restore"
+                exit 1
+              fi
+
+              echo "Downloading backup: $BACKUP_FILE"
+              apk add --no-cache aws-cli --quiet 2>/dev/null || true
+              aws s3 cp $BACKUP_FILE /tmp/restore.sql.gz
+
+              echo "Dropping and recreating schema..."
+              psql -h postgres -U aiplatform -d aiplatform -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+              echo "Restoring..."
+              gunzip -c /tmp/restore.sql.gz | psql -h postgres -U aiplatform -d aiplatform
+
+              echo "Restore complete"
