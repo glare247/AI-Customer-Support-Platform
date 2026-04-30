@@ -6,7 +6,6 @@ grafana:
   adminPassword: "admin123"
   defaultDashboardsEnabled: true
 
-  # Auto-load the AI platform dashboard from ConfigMap
   sidecar:
     dashboards:
       enabled: true
@@ -14,13 +13,16 @@ grafana:
       labelValue: "1"
       searchNamespace: monitoring
 
-  grafana.ini:
-    server:
-      root_url: "%(protocol)s://%(domain)s/"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
 
 prometheus:
   prometheusSpec:
-    # Scrape pods with prometheus.io/scrape: "true" annotation
     podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
 
@@ -48,8 +50,8 @@ prometheus:
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
 
-    retention: 15d
-    retentionSize: "8GiB"
+    retention: 7d
+    retentionSize: "4GiB"
 
     resources:
       requests:
@@ -59,5 +61,54 @@ prometheus:
         cpu: 500m
         memory: 1Gi
 
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 8Gi
+
+# Disable components not available in managed EKS
 alertmanager:
   enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+nodeExporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi

@@ -12,6 +12,7 @@ from ai_platform.api import chat, conversations, files, health, rag
 from ai_platform.config import settings
 from ai_platform.core.logging import setup_logging
 from ai_platform.core.middleware import RequestIDMiddleware, TimingMiddleware
+from ai_platform.core.telemetry import setup_telemetry
 from ai_platform.dependencies import close_clients
 
 logger = structlog.get_logger(__name__)
@@ -20,6 +21,7 @@ logger = structlog.get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    setup_telemetry(app)
     await logger.ainfo("startup", env=settings.app_env)
     yield
     await logger.ainfo("shutdown")

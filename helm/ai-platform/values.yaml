@@ -35,3 +35,7 @@ env:
     value: "faq_documents"
   - name: CACHE_TTL_SECONDS
     value: "3600"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://tempo.monitoring.svc.cluster.local:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "ai-platform"
