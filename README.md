@@ -66,6 +66,8 @@ The platform enables a SaaS company to:
     VPC | Subnets | NAT | IGW | EKS | ECR | EBS | IRSA
     Terraform state: S3 (versioned + encrypted)
 ```
+<img width="1280" height="714" alt="ai architecture" src="https://github.com/user-attachments/assets/1d1f61ff-943e-4130-b89f-c0408ebf95ef" />
+
 
 ---
 
@@ -300,6 +302,7 @@ terraform apply
 ```
 
 Creates: VPC, public/private subnets across 2 AZs, NAT Gateway, Internet Gateway, EKS cluster (Kubernetes 1.35), node group (t3.small x4), ECR repository, OIDC provider, IAM roles for IRSA.
+<img width="1792" height="1120" alt="aws" src="https://github.com/user-attachments/assets/c2276a86-f853-45fd-9f08-327b02f58792" />
 
 ### Step 2 — Connect kubectl
 
@@ -335,8 +338,7 @@ kubectl apply -n argocd \
 # Get admin password
 kubectl get secret argocd-initial-admin-secret -n argocd \
   -o jsonpath="{.data.password}" | base64 -d && echo
-```
-
+``
 ### Step 5 — Create application secrets
 
 ```bash
@@ -350,6 +352,8 @@ kubectl create secret generic ai-platform-secrets \
   --from-literal=QDRANT_HOST="qdrant" \
   --from-literal=QDRANT_PORT="6333"
 ```
+<img width="1792" height="1120" alt="argocd homepage" src="https://github.com/user-attachments/assets/8b85d7a3-fdc8-4bb4-8f83-e116dd4a4109" />
+
 
 ### Step 6 — Bootstrap ArgoCD (App of Apps)
 
@@ -412,7 +416,22 @@ ArgoCD
   Rolling update in EKS
   Zero downtime (maxUnavailable: 0)
   Self-heals any manual drift within 3 minutes
+
 ```
+<img width="1792" height="1120" alt="ci" src="https://github.com/user-attachments/assets/04a111c7-fc7e-4770-bf5f-730dfece2923" />
+
+<img width="1792" height="1120" alt="ci2" src="https://github.com/user-attachments/assets/5e6d5ecf-40e7-4d0f-809c-91343d405c78" />
+
+
+
+<img width="1792" height="1120" alt="ci new" src="https://github.com/user-attachments/assets/bced75f0-4758-431b-b381-386f179dd122" />
+
+<img width="1792" height="1120" alt="argocd1" src="https://github.com/user-attachments/assets/a4a1e2c5-ee2d-4173-869f-07fe1b0beb72" />
+
+
+<img width="1792" height="1120" alt="argocd2" src="https://github.com/user-attachments/assets/0b93766e-d48a-4134-8534-a40d2380db74" />
+
+<img width="1792" height="1120" alt="argod3" src="https://github.com/user-attachments/assets/f4ee568d-a1bc-44c9-a8b3-6a82c2c783b9" />
 
 ### Rollback
 
@@ -438,6 +457,11 @@ git revert HEAD && git push origin main
 | Prometheus | kubectl port-forward 9090 | none |
 | Loki | via Grafana Explore | none |
 | Tempo | via Grafana Explore | none |
+
+
+<img width="1792" height="1120" alt="grafana1" src="https://github.com/user-attachments/assets/035142e0-a94e-4bfc-a492-09224e3cc81f" />
+
+<img width="1792" height="1120" alt="grafana2" src="https://github.com/user-attachments/assets/84aacd35-4b20-44c7-81d5-72decb88a09c" />
 
 ### Deploy
 
@@ -580,6 +604,13 @@ kubectl apply -f k8s/argocd-app-of-apps.yaml
 # 5. Restore database from latest S3 backup
 kubectl apply -f k8s/base/postgres-restore.yaml
 ```
+
+<img width="1792" height="1120" alt="app1" src="https://github.com/user-attachments/assets/4e2d3384-7438-4f14-b99a-15ae4cd6561c" />
+
+
+<img width="1792" height="1120" alt="app2" src="https://github.com/user-attachments/assets/a391b517-55a6-4414-bb12-406d179cb73d" />
+
+
 
 ---
 
